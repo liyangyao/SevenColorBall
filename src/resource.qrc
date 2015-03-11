@@ -3,5 +3,9 @@
         <file>res/48.png</file>
         <file>res/20.png</file>
         <file>res/32.png</file>
+        <file>res/40.png</file>
+        <file>res/28.png</file>
+        <file>res/36.png</file>
+        <file>res/44.png</file>
     </qresource>
 </RCC>

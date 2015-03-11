@@ -21,23 +21,33 @@ public:
 private slots:
     void on_btnTest_clicked();
     void onGenerateBallTimeout();
+    void onAnimationTimeout();
 
 private:
     Ui::MainForm *ui;
+    int m_score;
     QVector<QPixmap> m_images48;
+    QVector<QPixmap> m_images44;
+    QVector<QPixmap> m_images40;
+    QVector<QPixmap> m_images36;
     QVector<QPixmap> m_images32;
+    QVector<QPixmap> m_images28;
     QVector<QPixmap> m_images20;
-    QVector<int> m_path;
+    QStringList m_path;
+    int m_lastMoveDst;
     int m_nextBalls[3];
     bool findPath(int src, int dst);
     QTimer m_generateBallTimer;
+    QTimer m_animationTimer;
     int m_generateBallCount;
     int m_selectBallSq;
+    int m_selectBallAnimationIndex;
     void loadImages(QVector<QPixmap> &images, const QString& fileName, int size);
     void genNextBalls();
     void generateRandom(int count);
     bool checkGameOver();
-    void checkScore();
+    bool checkScore();
+    void startMovePath();
     void draw(QPainter *p, int x, int y, const QPixmap &ball);
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *);

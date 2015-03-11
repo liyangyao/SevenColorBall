@@ -17,6 +17,10 @@ class FindPath
 public:
     FindPath(int src, int dst, int *board);
     bool start();
+    QStringList path()
+    {
+        return m_sqList;
+    }
 
 private:
     int m_src;

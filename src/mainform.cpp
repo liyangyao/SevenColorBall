@@ -7,22 +7,24 @@
 #include <QDebug>
 #include <QMessageBox>
 #include "findpath.h"
+#include <cstring>
 
 #pragma execution_character_set("UTF-8")
 enum BallType{NullBall, BlueBall, LimeBall, RedBall, AquaBall, OrangeBall, FuchsiaBall ,BlackBall, WhiteBall};
 
 int board[121] = {
-             99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
-             99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
-             99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
-             99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
-             99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
-             99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
-             99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
-             99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
-             99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
-             99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
-             99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99};
+    99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+    99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
+    99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
+    99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
+    99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
+    99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
+    99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
+    99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
+    99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
+    99, 00, 00, 00, 00, 00, 00, 00, 00, 00, 99,
+    99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99};
+int score[16]={0, 0, 0, 0, 100, 200, 350, 550, 800, 1100, 1450, 1850, 2300, 2800, 3350, 3950};
 
 const int PieceSize = 54;
 
@@ -61,11 +63,19 @@ MainForm::MainForm(QWidget *parent) :
     ui->setupUi(this);
     setWindowTitle(tr("七彩连珠"));
     m_selectBallSq = -1;
+    m_score = 0;
     connect(&m_generateBallTimer, SIGNAL(timeout()), this, SLOT(onGenerateBallTimeout()));
+    connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(onAnimationTimeout()));
+    m_animationTimer.start(70);
 
     loadImages(m_images48, ":/res/48.png", 48);
+    loadImages(m_images44, ":/res/44.png", 44);
+    loadImages(m_images40, ":/res/40.png", 40);
+    loadImages(m_images36, ":/res/36.png", 36);
     loadImages(m_images32, ":/res/32.png", 32);
+    loadImages(m_images28, ":/res/28.png", 28);
     loadImages(m_images20, ":/res/20.png", 20);
+
 
     //随机种子
     qsrand(time(0));
@@ -111,7 +121,32 @@ void MainForm::paintEvent(QPaintEvent *)
                 int sq = SQ(x, y);
                 if (sq==m_selectBallSq)
                 {
-                    draw(&p, x, y, m_images32[board[sq]-1]);
+                    switch (m_selectBallAnimationIndex) {
+                    case 0:
+                        draw(&p, x, y, m_images48[board[sq]-1]);
+                        break;
+                    case 1:
+                        draw(&p, x, y, m_images44[board[sq]-1]);
+                        break;
+                    case 2:
+                        draw(&p, x, y, m_images40[board[sq]-1]);
+                        break;
+                    case 3:
+                        draw(&p, x, y, m_images36[board[sq]-1]);
+                        break;
+                    case 4:
+                        draw(&p, x, y, m_images32[board[sq]-1]);
+                        break;
+                    case 5:
+                        draw(&p, x, y, m_images28[board[sq]-1]);
+                        break;
+                    case 6:
+                        draw(&p, x, y, m_images20[board[sq]-1]);
+                        break;
+                    default:
+                        break;
+                    }
+
                 }
                 else{
                     draw(&p, x, y, m_images48[board[sq]-1]);
@@ -137,6 +172,7 @@ void MainForm::mousePressEvent(QMouseEvent *event)
         if (ball>0 && sq!=m_selectBallSq)
         {
             m_selectBallSq = sq;
+            m_selectBallAnimationIndex = 0;
             update();
             return;
         }
@@ -144,12 +180,9 @@ void MainForm::mousePressEvent(QMouseEvent *event)
         {
             if (findPath(m_selectBallSq, sq))
             {
-                //todo:draw path
-                board[sq] = board[m_selectBallSq];
-                board[m_selectBallSq] = 0;
                 m_selectBallSq = -1;
-                checkScore();
-                generateRandom(3);
+                startMovePath();//do noting
+
             }
             return;
         }
@@ -192,10 +225,63 @@ void MainForm::onGenerateBallTimeout()
     update();
 }
 
+void MainForm::onAnimationTimeout()
+{
+    bool needRepaint = false;
+    //当前选中Ball的动画
+    if (m_selectBallSq>0)
+    {
+        static int delta = 1;
+        const int MaxIndex = 3;
+        m_selectBallAnimationIndex += delta;
+        if(m_selectBallAnimationIndex<0)
+        {
+            m_selectBallAnimationIndex = 1;
+            delta = 1;
+        }
+        if (m_selectBallAnimationIndex>MaxIndex)
+        {
+            m_selectBallAnimationIndex = MaxIndex-1;
+            delta = -1;
+        }
+        //qDebug()<<"m_selectBallAnimationIndex="<<m_selectBallAnimationIndex;
+        needRepaint = true;
+    }
+    if (m_path.count()>=2)
+    {
+        int src = m_path[0].toInt();
+        int dst = m_path[1].toInt();
+        //qDebug()<<"move "<<src<<"->"<<dst;
+        m_path.removeFirst();
+        board[dst] = board[src];
+        board[src] = NullBall;
+        needRepaint = true;
+    }
+    else if (m_path.count()==1)
+    {
+
+        m_path.clear();
+        if (!checkScore())
+        {
+            generateRandom(3);
+        }
+    }
+    if (needRepaint)
+    {
+        repaint();
+    }
+}
+
 bool MainForm::findPath(int src, int dst)
 {
     FindPath fp(src, dst, board);
-    return fp.start();
+    if (fp.start())
+    {
+        m_path = fp.path();
+        m_lastMoveDst = dst;
+        return true;
+    }
+    return false;
 
 }
 
@@ -213,10 +299,10 @@ void MainForm::loadImages(QVector<QPixmap> &images, const QString &fileName, int
 
 void MainForm::genNextBalls()
 {
-     for(int i=0; i<3; i++)
-     {
-         m_nextBalls[i] = qrand()% 8 + 1;
-     }
+    for(int i=0; i<3; i++)
+    {
+        m_nextBalls[i] = qrand()% 8 + 1;
+    }
 }
 
 void MainForm::generateRandom(int count)
@@ -246,15 +332,18 @@ bool MainForm::checkGameOver()
     return true;
 }
 
-void MainForm::checkScore()
+bool MainForm::checkScore()
 {
+    int snapshot[121];
+    std::memcpy(snapshot, board, sizeof(int)*121);
+
     QVector< QVector<int> > clearItemList;
     for(int x=0; x<9; x++)
     {
         for(int y=0; y<9; y++)
         {
             int sq = SQ(x, y);
-            int ball = board[sq];
+            int ball = snapshot[sq];
             if (ball==0 || ball==8)
             {
                 continue;
@@ -265,7 +354,7 @@ void MainForm::checkScore()
             for(int xx=x-1; xx>=0; xx--)
             {
                 int sq = SQ(xx, y);
-                int b = board[sq];
+                int b = snapshot[sq];
                 if (b!=8 && b!=ball)
                 {
                     break;
@@ -275,7 +364,7 @@ void MainForm::checkScore()
             for(int xx=x+1; xx<9; xx++)
             {
                 int sq = SQ(xx, y);
-                int b = board[sq];
+                int b = snapshot[sq];
                 if (b!=8 && b!=ball)
                 {
                     break;
@@ -284,6 +373,13 @@ void MainForm::checkScore()
             }
             if (horzItems.count()>=5)
             {
+                foreach(int sq, horzItems)
+                {
+                    if (sq!=m_lastMoveDst)
+                    {
+                        snapshot[sq] = 0;
+                    }
+                }
                 clearItemList.push_back(horzItems);
             }
 
@@ -293,7 +389,7 @@ void MainForm::checkScore()
             for(int yy=y-1; yy>=0; yy--)
             {
                 int sq = SQ(x, yy);
-                int b = board[sq];
+                int b = snapshot[sq];
                 if (b!=8 && b!=ball)
                 {
                     break;
@@ -303,7 +399,7 @@ void MainForm::checkScore()
             for(int yy=y+1; yy<9; yy++)
             {
                 int sq = SQ(x, yy);
-                int b = board[sq];
+                int b = snapshot[sq];
                 if (b!=8 && b!=ball)
                 {
                     break;
@@ -312,6 +408,13 @@ void MainForm::checkScore()
             }
             if (vertItems.count()>=5)
             {
+                foreach(int sq, vertItems)
+                {
+                    if (sq!=m_lastMoveDst)
+                    {
+                        snapshot[sq] = 0;
+                    }
+                }
                 clearItemList.push_back(vertItems);
             }
 
@@ -324,7 +427,7 @@ void MainForm::checkScore()
                 while(1)
                 {
                     int sq = SQ(xx, yy);
-                    int b = board[sq];
+                    int b = snapshot[sq];
                     if (b!=8 && b!=ball)
                     {
                         break;
@@ -340,7 +443,7 @@ void MainForm::checkScore()
                 while(1)
                 {
                     int sq = SQ(xx, yy);
-                    int b = board[sq];
+                    int b = snapshot[sq];
                     if (b!=8 && b!=ball)
                     {
                         break;
@@ -352,6 +455,13 @@ void MainForm::checkScore()
             }
             if (xItems.count()>=5)
             {
+                foreach(int sq, xItems)
+                {
+                    if (sq!=m_lastMoveDst)
+                    {
+                        snapshot[sq] = 0;
+                    }
+                }
                 clearItemList.push_back(xItems);
             }
 
@@ -363,7 +473,7 @@ void MainForm::checkScore()
                 while(1)
                 {
                     int sq = SQ(xx, yy);
-                    int b = board[sq];
+                    int b = snapshot[sq];
                     if (b!=8 && b!=ball)
                     {
                         break;
@@ -379,7 +489,7 @@ void MainForm::checkScore()
                 while(1)
                 {
                     int sq = SQ(xx, yy);
-                    int b = board[sq];
+                    int b = snapshot[sq];
                     if (b!=8 && b!=ball)
                     {
                         break;
@@ -391,21 +501,45 @@ void MainForm::checkScore()
             }
             if (yItems.count()>=5)
             {
+                foreach(int sq, yItems)
+                {
+                    if (sq!=m_lastMoveDst)
+                    {
+                        snapshot[sq] = 0;
+                    }
+                }
                 clearItemList.push_back(yItems);
             }
         }
     }
     if (clearItemList.count()>0)
     {
+        int scoreBallCount = 0;
         foreach(const QVector<int> &items, clearItemList)
         {
+            scoreBallCount += items.count();
             foreach(int sq, items)
             {
                 board[sq] = NullBall;
             }
         }
+        if (m_selectBallSq>=0 && snapshot[m_selectBallSq]==0)
+        {
+            m_selectBallSq = -1;
+        }
+        qDebug()<<"scoreBallCount="<<scoreBallCount;
+        m_score += score[scoreBallCount-1];
+        ui->lblScore->setText(QString::number(m_score));
         repaint();
+        return true;
     }
+    return false;
+
+}
+
+void MainForm::startMovePath()
+{
+
 }
 
 void MainForm::draw(QPainter *p, int x, int y, const QPixmap &ball)
