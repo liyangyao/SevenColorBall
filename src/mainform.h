@@ -27,10 +27,14 @@ private:
     QVector<QPixmap> m_images48;
     QVector<QPixmap> m_images32;
     QVector<QPixmap> m_images20;
+    QVector<int> m_path;
+    int m_nextBalls[3];
+    bool findPath(int src, int dst);
     QTimer m_generateBallTimer;
     int m_generateBallCount;
     int m_selectBallSq;
     void loadImages(QVector<QPixmap> &images, const QString& fileName, int size);
+    void genNextBalls();
     void generateRandom(int count);
     bool checkGameOver();
     void checkScore();

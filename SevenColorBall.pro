@@ -13,9 +13,11 @@ TEMPLATE = app
 DESTDIR = $$PWD/bin
 
 SOURCES += src/main.cpp\
-        src/mainform.cpp
+        src/mainform.cpp \
+    src/findpath.cpp
 
-HEADERS  += src/mainform.h
+HEADERS  += src/mainform.h \
+    src/findpath.h
 
 FORMS    += src/mainform.ui
 
