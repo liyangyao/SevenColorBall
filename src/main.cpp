@@ -1,6 +1,7 @@
 #include "mainform.h"
 #include <QApplication>
 #include <QTextCodec>
+#include <time.h>
 int main(int argc, char *argv[])
 {
 #ifdef Q_OS_WIN
@@ -10,6 +11,7 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForCStrings(codec);
 #endif
     QApplication a(argc, argv);
+    qsrand(time(0));
     MainForm w;
     w.show();
 

@@ -11,11 +11,12 @@ Date: 2015/3/11
 
 #include <QVector>
 #include <QStringList>
+#include "board.h"
 
 class FindPath
 {
 public:
-    FindPath(int src, int dst, int *board);
+    FindPath(int src, int dst, Board &board);
     bool start();
     QStringList path()
     {
@@ -25,13 +26,9 @@ public:
 private:
     int m_src;
     int m_dst;
-    int *m_board;
+    Board& m_board;
     bool goFrom(int sq);
     bool tryMoveTo(int sq);
-//    bool moveLeft(int sq);
-//    bool moveRight(int sq);
-//    bool moveUp(int sq);
-//    bool moveDown(int sq);
     QVector<bool> m_visit;
     QStringList m_sqList;
 };

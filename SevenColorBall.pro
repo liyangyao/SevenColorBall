@@ -14,10 +14,12 @@ DESTDIR = $$PWD/bin
 
 SOURCES += src/main.cpp\
         src/mainform.cpp \
-    src/findpath.cpp
+    src/findpath.cpp \
+    src/board.cpp
 
 HEADERS  += src/mainform.h \
-    src/findpath.h
+    src/findpath.h \
+    src/board.h
 
 FORMS    += src/mainform.ui
 

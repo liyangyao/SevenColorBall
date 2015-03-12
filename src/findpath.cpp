@@ -9,11 +9,11 @@ Date: 2015/3/11
 #include "findpath.h"
 #include <QDebug>
 
-FindPath::FindPath(int src, int dst, int *board):
+FindPath::FindPath(int src, int dst, Board &board):
     m_src(src),
     m_dst(dst),
     m_board(board),
-    m_visit(121, false)
+    m_visit(board.dataSize(), false)
 {
 
 }
@@ -34,10 +34,12 @@ bool FindPath::goFrom(int sq)
 
     enum Direct{Left, Right, Up, Down};
     Direct d[4];
-    int x = sq%11;
-    int y = sq/10;
-    int xx = m_dst%11;
-    int yy = m_dst/11;
+    int x;
+    int y;
+    m_board.XY(sq, x, y);
+    int xx;
+    int yy;
+    m_board.XY(m_dst, xx, yy);
     if (y==yy)//同一行
     {
         if (x<xx)
@@ -104,24 +106,28 @@ bool FindPath::goFrom(int sq)
         case Left:
             if (tryMoveTo(sq-1))
             {
+                //qDebug()<<"TRY Left";
                 return true;
             }
             break;
         case Right:
             if (tryMoveTo(sq+1))
             {
+                //qDebug()<<"TRY Right";
                 return true;
             }
             break;
         case Up:
-            if (tryMoveTo(sq-11))
+            if (tryMoveTo(sq-m_board.dataColCount()))
             {
+                //qDebug()<<"TRY Up";
                 return true;
             }
             break;
         case Down:
-            if (tryMoveTo(sq+11))
+            if (tryMoveTo(sq+m_board.dataColCount()))
             {
+                //qDebug()<<"TRY Down";
                 return true;
             }
             break;
@@ -129,33 +135,13 @@ bool FindPath::goFrom(int sq)
             break;
         }
     }
-//    //left
-//    if (tryMoveTo(sq-1))
-//    {
-//        return true;
-//    }
-//    //right
-//    if (tryMoveTo(sq+1))
-//    {
-//        return true;
-//    }
-//    //up
-//    if (tryMoveTo(sq-11))
-//    {
-//        return true;
-//    }
-//    //down
-//    if (tryMoveTo(sq+11))
-//    {
-//        return true;
-//    }
     m_sqList.removeLast();
     return false;
 }
 
 bool FindPath::tryMoveTo(int sq)
-{
-    if (!m_visit[sq] && m_board[sq]==0)
+{    
+    if (!m_visit[sq] && m_board.getBall(sq)==Board::NullBall)
     {
         if (sq==m_dst)
         {

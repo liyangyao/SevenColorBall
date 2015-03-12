@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QVector>
 #include <QTimer>
+#include "board.h"
 
 namespace Ui {
 class MainForm;
@@ -25,7 +26,6 @@ private slots:
 
 private:
     Ui::MainForm *ui;
-    int m_score;
     QVector<QPixmap> m_images48;
     QVector<QPixmap> m_images44;
     QVector<QPixmap> m_images40;
@@ -35,13 +35,13 @@ private:
     QVector<QPixmap> m_images20;
     QStringList m_path;
     int m_lastMoveDst;
-    int m_nextBalls[3];
+    Board::BallType m_nextBalls[3];
     bool findPath(int src, int dst);
     QTimer m_generateBallTimer;
     QTimer m_animationTimer;
     int m_generateBallCount;
-    int m_selectBallSq;
     int m_selectBallAnimationIndex;
+    Board m_board;
     void loadImages(QVector<QPixmap> &images, const QString& fileName, int size);
     void genNextBalls();
     void generateRandom(int count);
