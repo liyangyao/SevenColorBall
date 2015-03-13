@@ -219,7 +219,7 @@ void MainForm::onAnimationTimeout()
 
 bool MainForm::findPath(int src, int dst)
 {
-    FindPath fp(src, dst, m_board);
+    FindPath fp(src, dst, &m_board);
     if (fp.start())
     {
         m_path = fp.path();
@@ -357,98 +357,98 @@ bool MainForm::checkScore()
                 clearItemList.push_back(vertItems);
             }
 
-//            //斜线
-//            QVector<int> xItems;
-//            xItems.push_back(sq);
-//            {
-//                int xx = x - 1;
-//                int yy = y - 1;
-//                while(1)
-//                {
-//                    int sq = SQ(xx, yy);
-//                    int b = snapshot.getBall(sq);
-//                    if (b!=Board::WhiteBall && b!=ball)
-//                    {
-//                        break;
-//                    }
-//                    xItems.push_back(sq);
-//                    xx--;
-//                    yy--;
-//                }
-//            }
-//            {
-//                int xx = x + 1;
-//                int yy = y + 1;
-//                while(1)
-//                {
-//                    int sq = SQ(xx, yy);
-//                    int b = snapshot.getBall(sq);
-//                    if (b!=Board::WhiteBall && b!=ball)
-//                    {
-//                        break;
-//                    }
-//                    xItems.push_back(sq);
-//                    xx++;
-//                    yy++;
-//                }
-//            }
-//            if (xItems.count()>=5)
-//            {
-//                foreach(int sq, xItems)
-//                {
-//                    if (sq!=m_lastMoveDst)
-//                    {
-//                        snapshot.put(Board::NullBall, sq);
-//                    }
-//                }
-//                clearItemList.push_back(xItems);
-//            }
+            //斜线
+            QVector<int> xItems;
+            xItems.push_back(sq);
+            {
+                int xx = x - 1;
+                int yy = y - 1;
+                while(1)
+                {
+                    int sq = m_board.SQ(xx, yy);
+                    int b = snapshot.getBall(sq);
+                    if (b!=Board::WhiteBall && b!=ball)
+                    {
+                        break;
+                    }
+                    xItems.push_back(sq);
+                    xx--;
+                    yy--;
+                }
+            }
+            {
+                int xx = x + 1;
+                int yy = y + 1;
+                while(1)
+                {
+                    int sq = m_board.SQ(xx, yy);
+                    int b = snapshot.getBall(sq);
+                    if (b!=Board::WhiteBall && b!=ball)
+                    {
+                        break;
+                    }
+                    xItems.push_back(sq);
+                    xx++;
+                    yy++;
+                }
+            }
+            if (xItems.count()>=5)
+            {
+                foreach(int sq, xItems)
+                {
+                    if (sq!=m_lastMoveDst)
+                    {
+                        snapshot.put(Board::NullBall, sq);
+                    }
+                }
+                clearItemList.push_back(xItems);
+            }
 
-//            QVector<int> yItems;
-//            yItems.push_back(sq);
-//            {
-//                int xx = x + 1;
-//                int yy = y - 1;
-//                while(1)
-//                {
-//                    int sq = SQ(xx, yy);
-//                    int b = snapshot.getBall(sq);
-//                    if (b!=Board::WhiteBall && b!=ball)
-//                    {
-//                        break;
-//                    }
-//                    yItems.push_back(sq);
-//                    xx++;
-//                    yy--;
-//                }
-//            }
-//            {
-//                int xx = x - 1;
-//                int yy = y + 1;
-//                while(1)
-//                {
-//                    int sq = SQ(xx, yy);
-//                    int b = snapshot.getBall(sq);
-//                    if (b!=Board::WhiteBall && b!=ball)
-//                    {
-//                        break;
-//                    }
-//                    yItems.push_back(sq);
-//                    xx--;
-//                    yy++;
-//                }
-//            }
-//            if (yItems.count()>=5)
-//            {
-//                foreach(int sq, yItems)
-//                {
-//                    if (sq!=m_lastMoveDst)
-//                    {
-//                        snapshot.put(Board::NullBall, sq);
-//                    }
-//                }
-//                clearItemList.push_back(yItems);
-//            }
+            QVector<int> yItems;
+            yItems.push_back(sq);
+            {
+                int xx = x + 1;
+                int yy = y - 1;
+                while(1)
+                {
+                    int sq = m_board.SQ(xx, yy);
+                    int b = snapshot.getBall(sq);
+                    if (b!=Board::WhiteBall && b!=ball)
+                    {
+                        break;
+                    }
+                    yItems.push_back(sq);
+                    xx++;
+                    yy--;
+                }
+            }
+            {
+                int xx = x - 1;
+                int yy = y + 1;
+                while(1)
+                {
+                    int sq = m_board.SQ(xx, yy);
+                    int b = snapshot.getBall(sq);
+                    if (b!=Board::WhiteBall && b!=ball)
+                    {
+                        break;
+                    }
+                    yItems.push_back(sq);
+                    xx--;
+                    yy++;
+                }
+            }
+            if (yItems.count()>=5)
+            {
+                foreach(int sq, yItems)
+                {
+                    if (sq!=m_lastMoveDst)
+                    {
+                        snapshot.put(Board::NullBall, sq);
+                    }
+                }
+                clearItemList.push_back(yItems);
+            }
         }
     }
     if (clearItemList.count()>0)

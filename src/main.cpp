@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QTextCodec>
 #include <time.h>
+#include "boardwidget.h"
 int main(int argc, char *argv[])
 {
 #ifdef Q_OS_WIN
@@ -12,7 +13,9 @@ int main(int argc, char *argv[])
 #endif
     QApplication a(argc, argv);
     qsrand(time(0));
-    MainForm w;
+//    MainForm w;
+//    w.show();
+    BoardWidget w;
     w.show();
 
     return a.exec();

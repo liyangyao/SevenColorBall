@@ -16,7 +16,7 @@ Date: 2015/3/11
 class FindPath
 {
 public:
-    FindPath(int src, int dst, Board &board);
+    FindPath(int src, int dst, Board* board);
     bool start();
     QStringList path()
     {
@@ -26,7 +26,7 @@ public:
 private:
     int m_src;
     int m_dst;
-    Board& m_board;
+    Board* m_board;
     bool goFrom(int sq);
     bool tryMoveTo(int sq);
     QVector<bool> m_visit;

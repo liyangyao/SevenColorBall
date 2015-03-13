@@ -9,11 +9,11 @@ Date: 2015/3/11
 #include "findpath.h"
 #include <QDebug>
 
-FindPath::FindPath(int src, int dst, Board &board):
+FindPath::FindPath(int src, int dst, Board *board):
     m_src(src),
     m_dst(dst),
     m_board(board),
-    m_visit(board.dataSize(), false)
+    m_visit(board->dataSize(), false)
 {
 
 }
@@ -36,10 +36,10 @@ bool FindPath::goFrom(int sq)
     Direct d[4];
     int x;
     int y;
-    m_board.XY(sq, x, y);
+    m_board->XY(sq, x, y);
     int xx;
     int yy;
-    m_board.XY(m_dst, xx, yy);
+    m_board->XY(m_dst, xx, yy);
     if (y==yy)//同一行
     {
         if (x<xx)
@@ -118,14 +118,14 @@ bool FindPath::goFrom(int sq)
             }
             break;
         case Up:
-            if (tryMoveTo(sq-m_board.dataColCount()))
+            if (tryMoveTo(sq-m_board->dataColCount()))
             {
                 //qDebug()<<"TRY Up";
                 return true;
             }
             break;
         case Down:
-            if (tryMoveTo(sq+m_board.dataColCount()))
+            if (tryMoveTo(sq+m_board->dataColCount()))
             {
                 //qDebug()<<"TRY Down";
                 return true;
@@ -140,17 +140,18 @@ bool FindPath::goFrom(int sq)
 }
 
 bool FindPath::tryMoveTo(int sq)
-{    
-    if (!m_visit[sq] && m_board.getBall(sq)==Board::NullBall)
+{
+    if (sq==m_dst)
     {
-        if (sq==m_dst)
-        {
-            m_sqList.append(QString::number(sq));
-            qDebug()<<"------Find-----";
-            qDebug()<<m_sqList.join("->");
+        m_sqList.append(QString::number(sq));
+        qDebug()<<"------Find-----";
+        qDebug()<<m_sqList.join("->");
 
-            return true;
-        }
+        return true;
+    }
+    if (!m_visit[sq] && m_board->getBall(sq)==Board::NullBall)
+    {
+
         return goFrom(sq);
     }
     return false;
